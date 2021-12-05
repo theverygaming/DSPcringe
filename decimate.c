@@ -15,8 +15,7 @@ void main()
 	int samp_count = inFileInfo.frames;
 	int samp_rate = inFileInfo.samplerate;
 	float samples[samp_count];
-	//int *samples2 = samples;
-	sf_readf_float(inFile, &samples, samp_count); //??? fix this pointer thing pls
+	sf_readf_float(inFile, &samples, samp_count); //??? fix this pointer thing pls why it produce warning error idk
 	sf_close(inFile);
 	printf("Sample Rate = %d Hz\n", samp_rate);
 	printf("Sample Count = %d Hz\n", samp_count);
@@ -27,6 +26,7 @@ void main()
 	for (int i = 0; i < samp_count; i++)
 	{
 		//printf("%f \n", samples[i]);
+		//lmfao this is how you decimate by two right right? no it isn't, this is crappy code
 		if(idk)
 		{
 			samplesDec[decCount] = samples[i];
