@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <sndfile.h>
+#include <math.h>
 
 void main()
 {
@@ -50,6 +51,20 @@ void main()
 	for (int i = 0; i < 100; i++)
 	{
 		printf("%f\n", inputComplex[(i)]); // print that shi for debug
+	}
+
+	//Generate sine and cosine for complex mixing
+	float pi = 3.14159265358979323846;
+	float frequency = 1.05;
+	float ComplexSine[samp_count * 2];
+	for(int i = 0; i < samp_count; i++)
+	{
+		ComplexSine[(2*i)] = cos((2*pi*frequency)/(samp_rate*i));
+		ComplexSine[(2*i)+1] = sin((2*pi*frequency)/(samp_rate*i));
+	}
+	for (int i = 0; i < 100; i++)
+	{
+		printf("%f\n", ComplexSine[(i)]); // print that shi for debug
 	}
 
 

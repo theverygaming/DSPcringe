@@ -51,5 +51,5 @@ include_directories(${LIBSNDFILE_INCLUDE_DIRS})
 
 
 add_executable(decimate decimate.c)
-
+target_link_libraries(decimate PUBLIC m) 
 target_link_libraries(decimate PUBLIC sndfile)
