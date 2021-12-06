@@ -40,6 +40,19 @@ void main()
 	}
 	sf_close(inFile);
 	
+	//Convert real array into complex, set Imaginary to zero
+	float inputComplex[samp_count * 2];
+	for (int i = 0; i < samp_count; i++)
+	{
+		inputComplex[(2*i)] = samples[i];
+		inputComplex[(2*i)+1] = 1.5;
+	}
+	for (int i = 0; i < 100; i++)
+	{
+		printf("%f\n", inputComplex[(i)]); // print that shi for debug
+	}
+
+
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
 	SF_INFO outFileInfo = inFileInfo;
@@ -48,3 +61,5 @@ void main()
 	sf_writef_float(outFile, &samplesDec, samp_count / 2);
 	sf_close(outFile);
 }
+
+
