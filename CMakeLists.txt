@@ -49,7 +49,10 @@ pkg_search_module(SndFile REQUIRED sndfile)
 include_directories(${LIBSNDFILE_INCLUDE_DIRS})
 
 
-
 add_executable(decimate decimate.c)
-target_link_libraries(decimate PUBLIC m) 
+
+
 target_link_libraries(decimate PUBLIC sndfile)
+target_link_libraries(decimate PUBLIC m)
+target_link_libraries(decimate PUBLIC fftw3)
+target_link_libraries(decimate PUBLIC rtfilter)

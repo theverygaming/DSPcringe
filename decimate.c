@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <sndfile.h>
 #include <math.h>
+#include <fftw3.h>
+#include <rtfilter.h>
 
 void main()
 {
@@ -48,13 +50,23 @@ void main()
 		outputComplex[(2*i)+1] = inputComplex[(2*i)] * ComplexSine[(2*i)+1] + inputComplex[(2*i)+1] * ComplexSine[(2*i)]; //real
 	}
 
+	
+	//lowpass struggle
+
+
+
+
 	//Convert complex array back to real, will flip over imaginary!
 	float outputReal[samp_count];
 	for(int i = 0; i < samp_count; i++)
 	{
-		outputReal[i] = outputComplex[(2*i)+1]; // just take the real part
+		outputReal[i] = outputComplex[(2*i)]; // just take the real part
 	}
 
+	//crappy lowpass
+	//fuck it i will use a libary
+	
+	
 
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
