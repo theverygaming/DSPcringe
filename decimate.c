@@ -45,36 +45,44 @@ void main()
 	float inputComplex[samp_count * 2];
 	for (int i = 0; i < samp_count; i++)
 	{
-		inputComplex[(2*i)] = samples[i];
-		inputComplex[(2*i)+1] = 0;
-	}
-	for (int i = 0; i < 100; i++)
-	{
-		printf("%f\n", inputComplex[(i)]); // print that shi for debug
+		inputComplex[(2*i)] = 0; //imaginary
+		inputComplex[(2*i)+1] = samples[i]; //real
 	}
 
 	//Generate sine and cosine for complex mixing
 	float pi = 3.14159265358979323846;
-	float frequency = 1.05;
+	float frequency = 8200;
 	float ComplexSine[samp_count * 2];
 	for(int i = 0; i < samp_count; i++)
 	{
-		ComplexSine[(2*i)] = cos((2*pi*frequency)/(samp_rate*i));
-		ComplexSine[(2*i)+1] = sin((2*pi*frequency)/(samp_rate*i));
+		ComplexSine[(2*i)] = cos(frequency * (2 * pi) * i / samp_rate); // imaginary
+		ComplexSine[(2*i)+1] = sin(frequency * (2 * pi) * i / samp_rate); //real
 	}
-	for (int i = 0; i < 100; i++)
+
+	//Mix complex signals together
+	float outputComplex[samp_count * 2];
+	for(int i = 0; i < samp_count; i++)
 	{
-		printf("%f\n", ComplexSine[(i)]); // print that shi for debug
+		outputComplex[(2*i)] = inputComplex[(2*i)] * ComplexSine[(2*i)] - inputComplex[(2*i)+1] * ComplexSine[(2*i)+1]; //imaginary
+		outputComplex[(2*i)+1] = inputComplex[(2*i)] * ComplexSine[(2*i)+1] + inputComplex[(2*i)+1] * ComplexSine[(2*i)]; //real
+	}
+
+	//Convert complex array back to real, will flip over imaginary!
+	float outputReal[samp_count];
+	for(int i = 0; i < samp_count; i++)
+	{
+		outputReal[i] = outputComplex[(2*i)+1]; // just take the real part
 	}
 
 
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
 	SF_INFO outFileInfo = inFileInfo;
-	outFileInfo.samplerate = 24000;
+	outFileInfo.samplerate = 48000;
 	outFile = sf_open(outFileName, SFM_WRITE, &outFileInfo);
-	sf_writef_float(outFile, &samplesDec, samp_count / 2);
+	sf_writef_float(outFile, &outputReal, samp_count / 2);
 	sf_close(outFile);
 }
+
 
 
