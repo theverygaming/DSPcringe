@@ -20,25 +20,6 @@ void main()
 	sf_close(inFile);
 	printf("Sample Rate = %d Hz\n", samp_rate);
 	printf("Sample Count = %d Hz\n", samp_count);
-
-	float samplesDec[samp_count / 2];
-	bool idk = true;
-	int decCount = 0;
-	for (int i = 0; i < samp_count; i++)
-	{
-		//printf("%f \n", samples[i]);
-		//lmfao this is how you decimate by two right right? no it isn't, this is crappy code
-		if(idk)
-		{
-			samplesDec[decCount] = samples[i];
-			decCount++;
-			idk = false;
-		}
-		else
-		{
-			idk = true;
-		}
-	}
 	sf_close(inFile);
 	
 	//Convert real array into complex, set Imaginary to zero
@@ -80,7 +61,7 @@ void main()
 	SF_INFO outFileInfo = inFileInfo;
 	outFileInfo.samplerate = 48000;
 	outFile = sf_open(outFileName, SFM_WRITE, &outFileInfo);
-	sf_writef_float(outFile, &outputReal, samp_count / 2);
+	sf_writef_float(outFile, &outputReal, samp_count);
 	sf_close(outFile);
 }
 
