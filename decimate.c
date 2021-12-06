@@ -63,11 +63,21 @@ void main()
 		outputReal[i] = outputComplex[(2*i)]; // just take the real part
 	}
 
-	//crappy lowpass
-	//fuck it i will use a libary
+	//crappy lowpass <-- it should kind of be good now because it's a library, and libs work right? right?
+	double normfc = (double) 100 / (double) 48000; // cutoff divided by samplerate
+	hfilter lp1 = rtf_create_butterworth(1, RTF_FLOAT, normfc, 2, 0);
+	//hfilter lp2 = rtf_create_butterworth(1, RTF_FLOAT, normfc, 2, 0); // two filters because idk how the channels thingy works lmao
 	
-	
+	//Apply filters to output signal
+	float outputRealx[100], outputReal2[100];
+	for(int i = 0; i < 100; i++)
+	{
+		outputRealx[i] = 0.23;
+	}
+	rtf_filter(lp1, outputRealx, outputReal2, 100);
 
+	
+	/*
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
 	SF_INFO outFileInfo = inFileInfo;
@@ -75,6 +85,7 @@ void main()
 	outFile = sf_open(outFileName, SFM_WRITE, &outFileInfo);
 	sf_writef_float(outFile, &outputReal, samp_count);
 	sf_close(outFile);
+	*/
 }
 
 
