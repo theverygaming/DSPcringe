@@ -4,3 +4,4 @@ build/cmake_install.cmake
 build/decimate
 build/out.wav
 build/Makefile
+.vscode
