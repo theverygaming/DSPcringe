@@ -11,7 +11,7 @@ void main()
 	SNDFILE *inFile;
 	SF_INFO inFileInfo;
 	int fs;
-	
+
 	inFileName = "idk.wav";
 	inFile = sf_open(inFileName, SFM_READ, &inFileInfo);
 	int samp_count = inFileInfo.frames;
@@ -110,7 +110,9 @@ void main()
 	
 	//Apply filters to output signal
 	printf("Resampling to %d samples/sec\n", samp_rate / 100);
-	float *outputReal2 = calloc(samp_count / 100, sizeof(float));
+	int newSampleCount = samp_count / 100;
+	int newSampleRate = samp_rate / 100;
+	float *outputReal2 = calloc(newSampleCount, sizeof(float));
 	int samplecounter = 0;
 	for(int i = 0; i < samp_count; i++)
 	{
@@ -123,14 +125,60 @@ void main()
 	}
 	
 
-	
+	//Write the result to a file
 	printf("Writing to file\n");
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
 	SF_INFO outFileInfo = inFileInfo;
-	outFileInfo.samplerate = samp_rate / 100;
+	outFileInfo.samplerate = newSampleRate;
 	outFile = sf_open(outFileName, SFM_WRITE, &outFileInfo);
-	sf_writef_float(outFile, outputReal2, samp_count / 100);
+	sf_writef_float(outFile, outputReal2, newSampleCount);
 	sf_close(outFile);
+
+
+	//Free memory
+	free(samples);
+	free(inputComplex);
+	free(ComplexSine);
+	free(ComplexSine2);
+	free(outputComplex);
+	free(outputComplex2);
+	free(outputReal);
+
+	//Resize array for FFT
+	float *FFTout = calloc(513, sizeof(double));
+	processFFT(1024, outputReal2, FFTout);
+	for(int i = 0; i < 513; i++)
+	{
+		printf("%0.6f\n", FFTout[i]);
+	}
 	
+}
+
+
+
+void processFFT(int n, float *input, float *output) //input size must be equal to n, output has to be n/2 + 1
+{
+	//Resize array for FFT
+	double *FFTarray = calloc(n, sizeof(double));
+	fftw_complex *outFFTarray = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * (n / 2 + 1));
+	fftw_plan p = fftw_plan_dft_r2c_1d(n, FFTarray, outFFTarray, FFTW_MEASURE);
+	for(int i = 0; i < n; i++)
+	{
+		double multiplier = 0.5 * (1 - cos(2*3.14159265*i/(n - 1))); // hann window thanks to https://stackoverflow.com/a/3555393 lmfao
+		FFTarray[i] = multiplier * (double) input[i];
+	}
+	fftw_execute(p);
+	fftw_destroy_plan(p);
+	for(int i = 0; i < (n/2 + 1); i++)
+	{
+		double magnitude = sqrt(outFFTarray[i][0] * outFFTarray[i][0] + outFFTarray[i][1] * outFFTarray[i][1]);
+		output[i] = (float) magnitude;
+		//printf("%f\n", magnitude);
+	}
+	//free memory
+	free(FFTarray);
+	fftw_free(outFFTarray);
+	
+
 }
