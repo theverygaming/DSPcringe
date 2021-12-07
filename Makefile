@@ -3,7 +3,7 @@ LDLIBS = -lsndfile -lm -lfftw3
 CC = gcc
 
 main: decimate.o filter.o
-	$(CC) $(CFLAGS) $(LDLIBS) decimate.o filter.o -o build/decimate
+	$(CC) decimate.o filter.o $(LDLIBS) -o build/decimate
 
 clean:
 	$(RM) *.o

@@ -53,7 +53,6 @@ void main()
 	
 	//lowpass struggle
 	//Apply filters to I and Q
-	float outputReal2[samp_count];
 	BWLowPass* filterR = create_bw_low_pass_filter(50, 48000, 100);
 	BWLowPass* filterI = create_bw_low_pass_filter(50, 48000, 100);
 	for(int i = 0; i < samp_count; i++)
