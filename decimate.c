@@ -11,7 +11,7 @@ void main()
 	SNDFILE *inFile;
 	SF_INFO inFileInfo;
 	int fs;
-
+	
 	inFileName = "idk.wav";
 	inFile = sf_open(inFileName, SFM_READ, &inFileInfo);
 	int samp_count = inFileInfo.frames;
@@ -23,6 +23,13 @@ void main()
 	printf("Sample Rate = %d Hz\n", samp_rate);
 	printf("Sample Count = %d\n", samp_count);
 	sf_close(inFile);
+	if(samp_rate != 48000)
+	{
+		printf("Sample rate is not 48000 Hz, this code will not work\n");
+		return;
+	}
+
+	  
 
 	//Convert real array into complex, set Imaginary to zero
 	printf("Converting to complex\n");
@@ -127,6 +134,3 @@ void main()
 	sf_close(outFile);
 	
 }
-
-
-
