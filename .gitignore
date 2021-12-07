@@ -7,3 +7,4 @@ build/Makefile
 .vscode
 filter.o
 decimate.o
+build/FFTout.txt

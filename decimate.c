@@ -19,7 +19,7 @@ void main()
 	float *samples = calloc(samp_count, sizeof(float));
 	sf_readf_float(inFile, samples, samp_count); //??? fix this pointer thing pls why it produce warning error idk
 	sf_close(inFile);
-	printf("Be careful! This code will break with WAV files at 48000 Hz that are longer than about 12h\n");
+	printf("Be careful! This code will break with WAV files at 48000 Hz that are longer than about 12h. Actually it might be 6h but idk\n");
 	printf("Sample Rate = %d Hz\n", samp_rate);
 	printf("Sample Count = %d\n", samp_count);
 	sf_close(inFile);
@@ -145,13 +145,33 @@ void main()
 	free(outputComplex2);
 	free(outputReal);
 
-	//Resize array for FFT
-	float *FFTout = calloc(513, sizeof(double));
-	processFFT(1024, outputReal2, FFTout);
-	for(int i = 0; i < 513; i++)
+
+	int FFTsize = 1024;
+	int FFTsampleCount = floor((float) newSampleCount / (float) FFTsize) * FFTsize;
+	FILE *fftoutfile = fopen("FFTout.txt", "w"); //One line for each FFT comma sepearted
+	if(fftoutfile == NULL)
 	{
-		printf("%0.6f\n", FFTout[i]);
+		printf("Error opening file!\n");
+		return;
 	}
+	fprintf(fftoutfile, "Samplerate:%d FFTsize:%d CenterFrequency:8200 NewCenterFrequency:100 FilterFrequencyFromCenter:100\n", newSampleRate, FFTsize); //Still some hardcoded values
+	for(int i = 0; i < FFTsampleCount;)
+	{
+		float *FFTin = calloc(FFTsize, sizeof(float));
+		for(int j = 0; j < FFTsize; j++)
+		{
+			FFTin[j] = outputReal2[i+j];
+		}
+		float *FFTout = calloc((FFTsize / 2) + 1, sizeof(float));
+		processFFT(FFTsize, FFTin, FFTout);
+		for(int e = 0; e < ((FFTsize / 2) + 1) - 1; e++) //-1 because the last one will be written to file with line break
+		{
+			fprintf(fftoutfile, "%0.6f, ", FFTout[e]);
+		}
+		fprintf(fftoutfile, "%0.6f\n", FFTout[(FFTsize / 2) + 1]);
+		i += FFTsize;
+	}
+	fclose(fftoutfile);
 	
 }
 
