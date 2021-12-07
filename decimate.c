@@ -3,7 +3,7 @@
 #include <sndfile.h>
 #include <math.h>
 #include <fftw3.h>
-#include <rtfilter.h>
+#include "filter.h"
 
 void main()
 {
@@ -64,28 +64,26 @@ void main()
 	}
 
 	//crappy lowpass <-- it should kind of be good now because it's a library, and libs work right? right?
-	double normfc = (double) 100 / (double) 48000; // cutoff divided by samplerate
-	hfilter lp1 = rtf_create_butterworth(1, RTF_FLOAT, normfc, 2, 0);
-	//hfilter lp2 = rtf_create_butterworth(1, RTF_FLOAT, normfc, 2, 0); // two filters because idk how the channels thingy works lmao
 	
 	//Apply filters to output signal
-	float outputRealx[100], outputReal2[100];
-	for(int i = 0; i < 100; i++)
+	float outputReal2[samp_count];
+	BWLowPass* filter = create_bw_low_pass_filter(50, 48000, 500);
+	for(int i = 0; i < samp_count; i++)
 	{
-		outputRealx[i] = 0.23;
+		outputReal2[i] = bw_low_pass(filter, outputReal[i]);
 	}
-	rtf_filter(lp1, outputRealx, outputReal2, 100);
+	free_bw_low_pass(filter);
 
 	
-	/*
+	
     char *outFileName = "out.wav";
 	SNDFILE *outFile;
 	SF_INFO outFileInfo = inFileInfo;
 	outFileInfo.samplerate = 48000;
 	outFile = sf_open(outFileName, SFM_WRITE, &outFileInfo);
-	sf_writef_float(outFile, &outputReal, samp_count);
+	sf_writef_float(outFile, &outputReal2, samp_count);
 	sf_close(outFile);
-	*/
+	
 }
 
 

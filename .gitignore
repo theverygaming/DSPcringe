@@ -5,3 +5,5 @@ build/decimate
 build/out.wav
 build/Makefile
 .vscode
+filter.o
+decimate.o
