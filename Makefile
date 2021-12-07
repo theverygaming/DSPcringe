@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wshadow -O3 -g -march=native
+CFLAGS = -Wall -Wshadow -O3 -g
 LDLIBS = -lsndfile -lm -lfftw3
 CC = gcc
 
