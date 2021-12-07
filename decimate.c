@@ -52,6 +52,17 @@ void main()
 
 	
 	//lowpass struggle
+	//Apply filters to I and Q
+	float outputReal2[samp_count];
+	BWLowPass* filterR = create_bw_low_pass_filter(50, 48000, 100);
+	BWLowPass* filterI = create_bw_low_pass_filter(50, 48000, 100);
+	for(int i = 0; i < samp_count; i++)
+	{
+		outputComplex[(2*i)] = bw_low_pass(filterI, outputComplex[(2*i)]);
+		outputComplex[(2*i) + 1] = bw_low_pass(filterR, outputComplex[(2*i) + 1]);
+	}
+	free_bw_low_pass(filterR);
+	free_bw_low_pass(filterI);
 
 
 
