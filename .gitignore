@@ -4,3 +4,4 @@ build/out.wav
 filter.o
 decimate.o
 build/FFTout.txt
+FFTDataToImage.exe

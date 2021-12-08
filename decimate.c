@@ -154,7 +154,7 @@ void main()
 		printf("Error opening file!\n");
 		return;
 	}
-	fprintf(fftoutfile, "Samplerate:%d FFTsize:%d CenterFrequency:8200 NewCenterFrequency:100 FilterFrequencyFromCenter:100\n", newSampleRate, FFTsize); //Still some hardcoded values
+	fprintf(fftoutfile, "samplerate:%d fftsize:%d centerfrequency:8200 newcenterfrequency:100 filterfrequencyfromcenter:100\n", newSampleRate, FFTsize); //Still some hardcoded values
 	for(int i = 0; i < FFTsampleCount;)
 	{
 		float *FFTin = calloc(FFTsize, sizeof(float));
@@ -166,9 +166,16 @@ void main()
 		processFFT(FFTsize, FFTin, FFTout);
 		for(int e = 0; e < ((FFTsize / 2) + 1) - 1; e++) //-1 because the last one will be written to file with line break
 		{
-			fprintf(fftoutfile, "%0.6f, ", FFTout[e]);
+			fprintf(fftoutfile, "%0.6f,", FFTout[e]);
 		}
-		fprintf(fftoutfile, "%0.6f\n", FFTout[(FFTsize / 2) + 1]);
+		if(i + FFTsize < FFTsampleCount)
+		{
+			fprintf(fftoutfile, "%0.6f\n", FFTout[(FFTsize / 2) + 1]);
+		}
+		else
+		{
+			fprintf(fftoutfile, "%0.6f", FFTout[(FFTsize / 2) + 1]);
+		}
 		i += FFTsize;
 	}
 	fclose(fftoutfile);
