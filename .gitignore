@@ -5,3 +5,4 @@ filter.o
 decimate.o
 build/FFTout.txt
 FFTDataToImage.exe
+build/FFTout.png
