@@ -56,7 +56,7 @@ public class FFTDataToImage
         }
 
 
-        Bitmap bmp = new Bitmap(FFTruns, binAmount);
+        Bitmap bmp = new Bitmap(FFTruns + 100, binAmount); //Bitmap will need some extra size for frequency scale, will be dynamic size later
         for(int i = 0; i < FFTruns; i++)
         {
             for(int j = 0; j < binAmount; j++)
@@ -64,11 +64,29 @@ public class FFTDataToImage
                 bmp.SetPixel(i, j, Color.FromArgb(0,0, (int)(FFTDataNormalized[i, j] * 255)));
             }
         }
+
+        for(int i = FFTruns; i < bmp.Width; i++)
+        {
+            for(int j = 0; j < bmp.Height; j++)
+            {
+                bmp.SetPixel(i, j, Color.FromArgb(0,0,0));
+            }
+        }
+
+        Pen WhitePen = new Pen(Color.White, 1);
+        int y = 0;
+        for(int i = 0; i < binAmount; i += 10)
+        {
+            
+            using(var graphics = Graphics.FromImage(bmp))
+            {
+                graphics.DrawLine(WhitePen, FFTruns, y, FFTruns+10, y);
+            }
+            y += 10;
+        }
+
         bmp.Save("build/FFTout.png");
     }
 
-    static void AddLineFFT(int[] data, int xPos)
-    {
-
-    }
+    
 }
