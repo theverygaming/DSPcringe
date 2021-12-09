@@ -56,7 +56,7 @@ public class FFTDataToImage
         }
 
 
-        Bitmap bmp = new Bitmap(FFTruns + 100, binAmount); //Bitmap will need some extra size for frequency scale, will be dynamic size later
+        Bitmap bmp = new Bitmap(FFTruns + 30, binAmount); //Bitmap will need some extra size for frequency scale, will be dynamic size later
         for(int i = 0; i < FFTruns; i++)
         {
             for(int j = 0; j < binAmount; j++)
@@ -72,20 +72,28 @@ public class FFTDataToImage
                 bmp.SetPixel(i, j, Color.FromArgb(0,0,0));
             }
         }
-
+        
+        Bitmap bmp2 = new Bitmap(bmp, bmp.Width * 5, bmp.Height * 5); //Gotta upscale for the frequency scale to be higher resolution
         Pen WhitePen = new Pen(Color.White, 1);
         int y = 0;
-        for(int i = 0; i < binAmount; i += 10)
+        for(int i = 0; i < binAmount; i += 5)
         {
             
-            using(var graphics = Graphics.FromImage(bmp))
+            using(var graphics = Graphics.FromImage(bmp2))
             {
-                graphics.DrawLine(WhitePen, FFTruns, y, FFTruns+10, y);
+                graphics.DrawLine(WhitePen, FFTruns * 5, y * 5, (FFTruns+10) * 5, y * 5);
+                graphics.DrawString((((float)ReverseNumberInRange(i, 0, binAmount) * samplerate / fftsize) + FrequencyOffset).ToString(), new Font(FontFamily.GenericMonospace, 10), Brushes.White, (new RectangleF((FFTruns+11) * 5, (y - 1) * 5, (FFTruns+40) * 5, (y - 1) * 5)));
             }
-            y += 10;
+            y += 5;
         }
 
-        bmp.Save("build/FFTout.png");
+
+        bmp2.Save("build/FFTout.png");
+    }
+
+    static float ReverseNumberInRange(float number, float min, float max)
+    {
+        return (max + min) - number;
     }
 
     

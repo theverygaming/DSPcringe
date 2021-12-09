@@ -29,6 +29,13 @@ void main()
 		return;
 	}
 
+	const int MixCenterFrequency = 8271; //user
+	const int MixBandwidth = 20; //user
+	int FilterAndMixFrequency = MixBandwidth / 2;
+	//int samplerateDivider = 100;
+	int samplerateDivider = samp_rate / (MixBandwidth * 2);
+	const int FFTsize = 1024; //user
+	printf("FFT Resolution will be %f Hz\n", ((float)samp_rate / samplerateDivider) / FFTsize);
 	  
 
 	//Convert real array into complex, set Imaginary to zero
@@ -43,12 +50,12 @@ void main()
 	//Generate sine and cosine for complex mixing
 	printf("Generating sine and cosine 1\n");
 	float pi = 3.14159265358979323846;
-	float frequency = 8200;
+	//float frequency = 8200;
 	float *ComplexSine = calloc(samp_count * 2, sizeof(float));
 	for(int i = 0; i < samp_count; i++)
 	{
-		ComplexSine[(2*i)] = cos(frequency * (2 * pi) * i / samp_rate); // imaginary
-		ComplexSine[(2*i)+1] = sin(frequency * (2 * pi) * i / samp_rate); //real
+		ComplexSine[(2*i)] = cos(MixCenterFrequency * (2 * pi) * i / samp_rate); // imaginary
+		ComplexSine[(2*i)+1] = sin(MixCenterFrequency * (2 * pi) * i / samp_rate); //real
 	}
 
 	//Mix complex signals together
@@ -64,8 +71,8 @@ void main()
 	//lowpass struggle
 	//Apply filters to I and Q
 	printf("Applying filters\n");
-	BWLowPass* filterR = create_bw_low_pass_filter(50, samp_rate, 100);
-	BWLowPass* filterI = create_bw_low_pass_filter(50, samp_rate, 100);
+	BWLowPass* filterR = create_bw_low_pass_filter(50, samp_rate, FilterAndMixFrequency);
+	BWLowPass* filterI = create_bw_low_pass_filter(50, samp_rate, FilterAndMixFrequency);
 	for(int i = 0; i < samp_count; i++)
 	{
 		outputComplex[(2*i)] = bw_low_pass(filterI, outputComplex[(2*i)]);
@@ -78,12 +85,12 @@ void main()
 
 	//Generate Another sine
 	printf("Generating sine and cosine 2\n");
-	frequency = 100;
+	//frequency = 100;
 	float *ComplexSine2 = calloc(samp_count * 2, sizeof(float));
 	for(int i = 0; i < samp_count; i++)
 	{
-		ComplexSine2[(2*i)+1] = cos(frequency * (2 * pi) * i / samp_rate); // real
-		ComplexSine2[(2*i)] = sin(frequency * (2 * pi) * i / samp_rate); //Imaginary
+		ComplexSine2[(2*i)+1] = cos(FilterAndMixFrequency * (2 * pi) * i / samp_rate); // real
+		ComplexSine2[(2*i)] = sin(FilterAndMixFrequency * (2 * pi) * i / samp_rate); //Imaginary
 	}
 
 	//Mix again
@@ -106,20 +113,20 @@ void main()
 		outputReal[i] = outputComplex2[(2*i)+1]; // just take the real part
 	}
 
-	//crappy lowpass <-- it should kind of be good now because it's a library, and libs work right? right?
+
 	
 	//Apply filters to output signal
-	printf("Resampling to %d samples/sec\n", samp_rate / 100);
-	int newSampleCount = samp_count / 100;
-	int newSampleRate = samp_rate / 100;
+	int newSampleCount = samp_count / samplerateDivider;
+	int newSampleRate = samp_rate / samplerateDivider;
+	printf("Resampling to %d samples/sec\n", newSampleRate);
 	float *outputReal2 = calloc(newSampleCount, sizeof(float));
 	int samplecounter = 0;
 	for(int i = 0; i < samp_count; i++)
 	{
 		samplecounter++;
-		if(samplecounter == 100)
+		if(samplecounter == samplerateDivider)
 		{
-			outputReal2[i/100] = outputReal[i];
+			outputReal2[i/samplerateDivider] = outputReal[i];
 			samplecounter = 0;
 		}
 	}
@@ -146,7 +153,6 @@ void main()
 	free(outputReal);
 
 
-	int FFTsize = 1024;
 	int FFTsampleCount = floor((float) newSampleCount / (float) FFTsize) * FFTsize;
 	FILE *fftoutfile = fopen("FFTout.txt", "w"); //One line for each FFT comma sepearted
 	if(fftoutfile == NULL)
@@ -154,7 +160,7 @@ void main()
 		printf("Error opening file!\n");
 		return;
 	}
-	fprintf(fftoutfile, "samplerate:%d fftsize:%d centerfrequency:8200 newcenterfrequency:100 filterfrequencyfromcenter:100\n", newSampleRate, FFTsize); //Still some hardcoded values
+	fprintf(fftoutfile, "samplerate:%d fftsize:%d centerfrequency:%d newcenterfrequency:%d filterfrequencyfromcenter:%d\n", newSampleRate, FFTsize, MixCenterFrequency, FilterAndMixFrequency, FilterAndMixFrequency); //Still some hardcoded values
 	for(int i = 0; i < FFTsampleCount;)
 	{
 		float *FFTin = calloc(FFTsize, sizeof(float));
