@@ -23,18 +23,14 @@ void main()
 	printf("Sample Rate = %d Hz\n", samp_rate);
 	printf("Sample Count = %d\n", samp_count);
 	sf_close(inFile);
-	if(samp_rate != 48000)
-	{
-		printf("Sample rate is not 48000 Hz, this code will not work\n");
-		return;
-	}
+	
 
-	const int MixCenterFrequency = 8271; //user
+	const int MixCenterFrequency = 8273; //user
 	const int MixBandwidth = 20; //user
 	int FilterAndMixFrequency = MixBandwidth / 2;
 	//int samplerateDivider = 100;
 	int samplerateDivider = samp_rate / (MixBandwidth * 2);
-	const int FFTsize = 1024; //user
+	const int FFTsize = 128; //user
 	printf("FFT Resolution will be %f Hz\n", ((float)samp_rate / samplerateDivider) / FFTsize);
 	  
 
@@ -46,6 +42,8 @@ void main()
 		inputComplex[(2*i)] = 0; //imaginary
 		inputComplex[(2*i)+1] = samples[i]; //real
 	}
+	free(samples); 
+
 
 	//Generate sine and cosine for complex mixing
 	printf("Generating sine and cosine 1\n");
@@ -66,6 +64,8 @@ void main()
 		outputComplex[(2*i)] = inputComplex[(2*i)] * ComplexSine[(2*i)] - inputComplex[(2*i)+1] * ComplexSine[(2*i)+1]; //imaginary
 		outputComplex[(2*i)+1] = inputComplex[(2*i)] * ComplexSine[(2*i)+1] + inputComplex[(2*i)+1] * ComplexSine[(2*i)]; //real
 	}
+	free(inputComplex); 
+	free(ComplexSine);
 
 	
 	//lowpass struggle
@@ -101,6 +101,8 @@ void main()
 		outputComplex2[(2*i)] = outputComplex[(2*i)] * ComplexSine2[(2*i)] - outputComplex[(2*i)+1] * ComplexSine2[(2*i)+1]; //imaginary
 		outputComplex2[(2*i)+1] = outputComplex[(2*i)] * ComplexSine2[(2*i)+1] + outputComplex[(2*i)+1] * ComplexSine2[(2*i)]; //real
 	}
+	free(outputComplex);
+	free(ComplexSine2);
 
 
 
@@ -112,6 +114,7 @@ void main()
 	{
 		outputReal[i] = outputComplex2[(2*i)+1]; // just take the real part
 	}
+	free(outputComplex2);
 
 
 	
@@ -130,6 +133,7 @@ void main()
 			samplecounter = 0;
 		}
 	}
+	free(outputReal);
 	
 
 	//Write the result to a file
@@ -143,14 +147,6 @@ void main()
 	sf_close(outFile);
 
 
-	//Free memory
-	free(samples);
-	free(inputComplex);
-	free(ComplexSine);
-	free(ComplexSine2);
-	free(outputComplex);
-	free(outputComplex2);
-	free(outputReal);
 
 
 	int FFTsampleCount = floor((float) newSampleCount / (float) FFTsize) * FFTsize;
