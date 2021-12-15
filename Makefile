@@ -1,5 +1,5 @@
 CFLAGS = -Wall -Wshadow -O3 -g
-LDLIBS = -lsndfile -lm -lfftw3
+LDLIBS = -lsndfile -lm -lfftw3 -lvolk
 CC = gcc
 
 main: decimate.o filter.o

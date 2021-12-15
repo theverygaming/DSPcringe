@@ -3,7 +3,9 @@
 #include <sndfile.h>
 #include <math.h>
 #include <fftw3.h>
+#include <complex.h>
 #include "filter.h"
+#include <volk/volk.h>
 
 void main()
 {
@@ -36,15 +38,14 @@ void main()
 
 	//Convert real array into complex, set Imaginary to zero
 	printf("Converting to complex\n");
-	float *inputComplex = calloc(samp_count * 2, sizeof(float));
+	complex float *inputComplex = (complex float*) calloc(samp_count, sizeof(complex float));
 	for (unsigned int i = 0; i < samp_count; i++)
 	{
-		inputComplex[(2*i)] = 0; //imaginary
-		inputComplex[(2*i)+1] = samples[i]; //real
+		inputComplex[i] = samples[i]+0*I;
 	}
 	free(samples); 
 
-
+	/*
 	//Generate sine and cosine for complex mixing
 	printf("Generating sine and cosine 1\n");
 	float pi = 3.14159265358979323846;
@@ -66,6 +67,17 @@ void main()
 	}
 	free(inputComplex); 
 	free(ComplexSine);
+	*/
+
+	int carrier = MixCenterFrequency;
+    printf("Mixing signals\n");
+    unsigned int alignment = volk_get_alignment();
+    lv_32fc_t* outputComplex = (lv_32fc_t*)volk_malloc(sizeof(lv_32fc_t)*samp_count, alignment);
+    float sinAngle = 2.0 * 3.14159265359 * carrier / samp_rate;
+    lv_32fc_t phase_increment = lv_cmake(cos(sinAngle), sin(sinAngle));
+    lv_32fc_t phase= lv_cmake(1.f, 0.0f);
+    volk_32fc_s32fc_x2_rotator_32fc(outputComplex, inputComplex, phase_increment, &phase, samp_count);
+	free(inputComplex); 
 
 	
 	//lowpass struggle
@@ -75,14 +87,15 @@ void main()
 	BWLowPass* filterI = create_bw_low_pass_filter(50, samp_rate, FilterAndMixFrequency);
 	for(int i = 0; i < samp_count; i++)
 	{
-		outputComplex[(2*i)] = bw_low_pass(filterI, outputComplex[(2*i)]);
-		outputComplex[(2*i) + 1] = bw_low_pass(filterR, outputComplex[(2*i) + 1]);
+		float imag = bw_low_pass(filterI, cimag(outputComplex[i]));
+		float real = bw_low_pass(filterR, creal(outputComplex[i]));
+		outputComplex[i] = real+imag*I;
 	}
 	free_bw_low_pass(filterR);
 	free_bw_low_pass(filterI);
 
 
-
+	
 	//Generate Another sine
 	printf("Generating sine and cosine 2\n");
 	//frequency = 100;
@@ -101,7 +114,8 @@ void main()
 		outputComplex2[(2*i)] = outputComplex[(2*i)] * ComplexSine2[(2*i)] - outputComplex[(2*i)+1] * ComplexSine2[(2*i)+1]; //imaginary
 		outputComplex2[(2*i)+1] = outputComplex[(2*i)] * ComplexSine2[(2*i)+1] + outputComplex[(2*i)+1] * ComplexSine2[(2*i)]; //real
 	}
-	free(outputComplex);
+	//free(outputComplex);
+	volk_free(outputComplex2);
 	free(ComplexSine2);
 
 
