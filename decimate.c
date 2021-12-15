@@ -27,12 +27,12 @@ void main()
 	sf_close(inFile);
 	
 
-	const int MixCenterFrequency = 8273; //user
-	const int MixBandwidth = 20; //user
+	const int MixCenterFrequency = 8275; //user
+	const int MixBandwidth = 100; //user
 	int FilterAndMixFrequency = MixBandwidth / 2;
 	//int samplerateDivider = 100;
 	int samplerateDivider = samp_rate / (MixBandwidth * 2);
-	const int FFTsize = 128; //user
+	const int FFTsize = 1024; //user
 	printf("FFT Resolution will be %f Hz\n", ((float)samp_rate / samplerateDivider) / FFTsize);
 	  
 
@@ -68,16 +68,16 @@ void main()
 	free(inputComplex); 
 	free(ComplexSine);
 	*/
-
-	int carrier = MixCenterFrequency;
+	
     printf("Mixing signals\n");
     unsigned int alignment = volk_get_alignment();
     lv_32fc_t* outputComplex = (lv_32fc_t*)volk_malloc(sizeof(lv_32fc_t)*samp_count, alignment);
-    float sinAngle = 2.0 * 3.14159265359 * carrier / samp_rate;
-    lv_32fc_t phase_increment = lv_cmake(cos(sinAngle), sin(sinAngle));
+    float sinAngle = 2.0 * 3.14159265359 * MixCenterFrequency / samp_rate;
+    lv_32fc_t phase_increment = lv_cmake(sin(sinAngle), cos(sinAngle));
     lv_32fc_t phase= lv_cmake(1.f, 0.0f);
     volk_32fc_s32fc_x2_rotator_32fc(outputComplex, inputComplex, phase_increment, &phase, samp_count);
 	free(inputComplex); 
+	
 
 	
 	//lowpass struggle
@@ -90,12 +90,13 @@ void main()
 		float imag = bw_low_pass(filterI, cimag(outputComplex[i]));
 		float real = bw_low_pass(filterR, creal(outputComplex[i]));
 		outputComplex[i] = real+imag*I;
+		
 	}
 	free_bw_low_pass(filterR);
 	free_bw_low_pass(filterI);
 
 
-	
+	/*
 	//Generate Another sine
 	printf("Generating sine and cosine 2\n");
 	//frequency = 100;
@@ -106,6 +107,7 @@ void main()
 		ComplexSine2[(2*i)] = sin(FilterAndMixFrequency * (2 * pi) * i / samp_rate); //Imaginary
 	}
 
+	
 	//Mix again
 	printf("Mixing signals\n");
 	float *outputComplex2 = calloc(samp_count * 2, sizeof(float));
@@ -115,8 +117,19 @@ void main()
 		outputComplex2[(2*i)+1] = outputComplex[(2*i)] * ComplexSine2[(2*i)+1] + outputComplex[(2*i)+1] * ComplexSine2[(2*i)]; //real
 	}
 	//free(outputComplex);
-	volk_free(outputComplex2);
+	volk_free(outputComplex);
 	free(ComplexSine2);
+	*/
+
+	
+    printf("Mixing signals\n");
+    unsigned int alignment2 = volk_get_alignment();
+    lv_32fc_t* outputComplex2 = (lv_32fc_t*)volk_malloc(sizeof(lv_32fc_t)*samp_count, alignment2);
+    float sinAngle2 = 2.0 * 3.14159265359 * FilterAndMixFrequency / samp_rate;
+    lv_32fc_t phase_increment2 = lv_cmake(cos(sinAngle), sin(sinAngle));
+    lv_32fc_t phase2= lv_cmake(1.f, 0.0f);
+    volk_32fc_s32fc_x2_rotator_32fc(outputComplex2, outputComplex, phase_increment2, &phase2, samp_count);
+	volk_free(outputComplex);
 
 
 
@@ -126,9 +139,9 @@ void main()
 	float *outputReal = calloc(samp_count, sizeof(float));
 	for(int i = 0; i < samp_count; i++)
 	{
-		outputReal[i] = outputComplex2[(2*i)+1]; // just take the real part
+		outputReal[i] = creal(outputComplex2[i]); // just take the real part
 	}
-	free(outputComplex2);
+	volk_free(outputComplex2);
 
 
 	
