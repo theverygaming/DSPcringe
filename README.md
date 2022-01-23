@@ -1,2 +1,2 @@
 # DSPcringe
-Haha me tryin mah best at DSP stuff. **Warning: contains shitty code that only works somewhat** _Actually i'm just using libraries now so there is no real DSP stuff in here_
+This is some kinda thing that takes a signal at a high samplerate, downsamples it and then processes the FFT
